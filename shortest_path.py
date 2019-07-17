@@ -11,20 +11,21 @@ graph = [("A", [("B", 6), ("D", 1)]),
          ("D", [("A", 1), ("B", 2), ("E", 1)]),
          ("E", [("B", 2), ("C", 5), ("D", 1)])]
 
-# A Graph is a listof((Str, listof((Str, Int)))
+# A Graph is a (listof (tuple Str (listof (tuple Str, Int)))
 
-# A Table is a dictionary of (Str : listof(Int, listof(Str)))
+# A ForwardTable is a (dictof Str (list Int, (listof Str)))
 
 # get_unvisited(g) returns a list of node that is unvisited
+#   from graph g
 # get_unvisited: Graph -> listof(Str)
 def get_unvisited(g):
     if g == []:
         return g
     return [g[0][0]] + get_unvisited(g[1:])
 
-# set_table(g) returns an empty information table that are used
+# set_table(g) returns an empty forwaring table that are used
 #   later to describe the graph
-# set_table: Graph Str Table -> Table     
+# set_table: Graph Str ForwardTable -> ForwardTable     
 def set_table(g, start, val):
     if g == []:
         return val
@@ -36,8 +37,8 @@ def set_table(g, start, val):
 
 # update_neighbors(cur_node, neighbors, table, path) updates
 #   the shortest path of cur_node's neighbors
-# update_neighbors: Str listof((Str, Int)) Table listof(Str) ->
-#                   Table
+# update_neighbors: Str (listof (tuple Str Int)) ForwardTable (listof Str) ->
+#                   ForwardTable
 def update_neighbors(cur_node, neighbors, table, path):
     if neighbors == []:
         return table
@@ -51,8 +52,8 @@ def update_neighbors(cur_node, neighbors, table, path):
 
 # shortest_path_neighbors(g, neighbors, unvisited, visited, table, path)
 #   returns the shortest path table from all neighbors
-# shortest_path_neighbors: Graph listof((Str, Int)) listof(Str) listof(Str)
-#                          Table listof(Str) -> Table
+# shortest_path_neighbors: Graph (listof (tuple Str Int)) (listof Str) (listof Str)
+#                          ForwardTable listof(Str) -> ForwardTable
 def shortest_path_neighbors(g, neighbors, unvisited, visited, table, path):
     if neighbors == []:
         return table
@@ -62,9 +63,9 @@ def shortest_path_neighbors(g, neighbors, unvisited, visited, table, path):
     return shortest_path_neighbors(g, neighbors[1:], unvisited, visited, update_table, path)   
 
 # shortest_path_node(g, neighbors, unvisited, visited, table, path)
-#   returns the shortest path table from start
-# shortest_path_node: Graph Str listof(Str) listof(Str) Table listof(Str) ->
-#                     Table
+#   returns the forwarding table from start
+# shortest_path_node: Graph Str (listof Str) (listof Str) ForwardTable 
+#                     (listof Str) -> ForwardTable
 def shortest_path_node(g, start, unvisited, visited, table, path):
     if unvisited == []:
         return table
@@ -72,11 +73,11 @@ def shortest_path_node(g, start, unvisited, visited, table, path):
     neighbors.sort(key = lambda x: x[1])
     unvisited.remove(start)
     visited.append(start)
+    path += [start]
     return shortest_path_neighbors(g, neighbors, unvisited, visited,
-                                   update_neighbors(start, neighbors, table, path + [start]),
-                                   path + [start])
+                                   update_neighbors(start, neighbors, table, path), path)
 
-# shortest_path(g, start) returns the shortest path table from start
-# shortest_path: Graph Str -> Table
+# shortest_path(g, start) returns the forwarding table computed from start
+# shortest_path: Graph Str -> ForwardTable
 def shortest_path(g, start):
     return shortest_path_node(g, start, get_unvisited(graph), [], set_table(graph, start, {}), [])
